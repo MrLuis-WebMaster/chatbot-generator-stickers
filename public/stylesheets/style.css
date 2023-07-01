@@ -1,0 +1,28 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+html, body {
+  height: 100%;
+  width: 100%;
+}
+body {
+  font: 14px "Lato", Helvetica, Arial, sans-serif !important;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.confetti {
+  background-image: url('../images/YTiF\ \(1\).gif');
+  position: relative;
+  z-index: 2;
+}
+.confetti::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  background-color: rgba(0, 0, 0, .8);
+}
