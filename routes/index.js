@@ -4,12 +4,18 @@ const { Client, LocalAuth, MessageMedia } = require("whatsapp-web.js");
 const qrcode = require("qrcode-terminal");
 const fs = require('fs');
 const mime = require('mime-types');
+const path = require('path');
+const ffmpegInstaller = require("@ffmpeg-installer/ffmpeg");
+const ffprobe = require("@ffprobe-installer/ffprobe");
+
+const ffmpeg = require("fluent-ffmpeg")
 
 const client = new Client({
   authStrategy: new LocalAuth(),
   puppeteer: {
     args: ["--no-sandbox"],
   },
+  ffmpegPath:  process.env.ROUTE_FFMPEG
 });
 
 const getStatusClient = async () => await client.getState();
@@ -21,13 +27,12 @@ client.on("ready", () => {
 client.on("message", async (message) => {
   let chat = await message.getChat();
   chat.sendSeen();
-  console.log(message.body);
-  console.log(chat);
+
   if (message.hasMedia) {
     try {
       const media = await message.downloadMedia();
       if (media) {
-        const mediaPath = "./uploads";
+        const mediaPath = path.join(__dirname, "../public/uploads");
 
         await client.sendMessage(
           message.from,
@@ -35,20 +40,18 @@ client.on("message", async (message) => {
         );
 
         if (!fs.existsSync(mediaPath)) {
-          fs.mkdirSync(mediaPath);
+          fs.mkdirSync(mediaPath, { recursive: true });
         }
 
         const extension = mime.extension(media.mimetype);
-
         const filename = new Date().getTime();
 
-        const fullFilename = mediaPath + filename + "." + extension;
+        const fullFilename = path.join(mediaPath, filename + "." + extension); 
 
         fs.writeFileSync(fullFilename, media.data, { encoding: "base64" });
-        console.log("File downloaded successfully!", fullFilename);
-        console.log(fullFilename);
 
-        MessageMedia.fromFilePath((filePath = fullFilename));
+        console.log("File downloaded successfully!", fullFilename);
+
         await client.sendMessage(
           message.from,
           new MessageMedia(media.mimetype, media.data, filename),
@@ -59,13 +62,14 @@ client.on("message", async (message) => {
           }
         );
 
+        fs.unlinkSync(fullFilename);     
+        
+        
         await client.sendMessage(
           message.from,
           'Ready the sticker for you 🥳, thanks for using the service.'
         );
 
-        fs.unlinkSync(fullFilename);
-        console.log(`File deleted successfully!`);
       }
     } catch (err) {
       console.log("Failed to save the file:", err);

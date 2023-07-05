@@ -1,0 +1,19 @@
+{
+    "version": 2,
+    "buildCommand": "yarn build",
+    "env": {
+      "FFMPEG_INSTALLER_URL": "https://github.com/eugeneware/ffmpeg-static/releases/download/4.4/ffmpeg-static.tar.gz"
+    },
+    "envSecrets": [],
+    "layers": [
+      {
+        "name": "ffmpeg",
+        "command": [
+          "mkdir -p /opt",
+          "cd /opt",
+          "curl $FFMPEG_INSTALLER_URL | tar xz"
+        ]
+      }
+    ]
+  }
+  
