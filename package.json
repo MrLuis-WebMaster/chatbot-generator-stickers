@@ -9,8 +9,11 @@
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@ffprobe-installer/ffprobe": "^2.1.0",
+    "axios": "^1.4.0",
+    "body-parser": "^1.20.2",
     "cookie-parser": "^1.4.4",
     "debug": "^2.6.9",
+    "dotenv": "^16.3.1",
     "ejs": "^3.1.9",
     "express": "^4.16.1",
     "fluent-ffmpeg": "^2.1.2",
