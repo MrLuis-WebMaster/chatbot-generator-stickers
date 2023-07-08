@@ -32,7 +32,8 @@ class whatsappService {
       const media = await message.downloadMedia();
       const mediaType = media.mimetype;
       if (!allowedTypes.includes(mediaType.slice(0, mediaType.indexOf("/")))) {
-        throw new Error(messagesByCases.ERROR_TYPE_ALLOWED);
+        await this.client.sendMessage(message.from, INFO_MESSAGES.ERROR_TYPE_ALLOWED_STICKER);
+        return;
       }
       if (media) {
         const mediaPath = path.join(__dirname, "../../public/uploads");
