@@ -13,6 +13,15 @@ class FunkyCommand extends BaseCommand {
     };
   }
 }
+class WizardCommand extends BaseCommand {
+  constructor() {
+    super("@wizard:");
+    this.messages = {
+      INVALID_COMMAND:
+        "You must type in a keyword or search after the colon. 😁",
+    };
+  }
+}
 
 class CreateCommand extends BaseCommand {
   constructor() {
@@ -62,13 +71,14 @@ class HelpCommand extends BaseCommand {
 
   getMenuMessage() {
     const COMMANDS = generateCommands();
-    return `If you want to create a sticker, simply send an image, video, or gif. 📷🎥🎞️\n\nCommand List:\n\n*${COMMANDS.FUNKY.type}* - Create a funky sticker by typing your search or keyword after the colon. 🔍\n*${COMMANDS.CREATE.type}* - Create a funky sticker with just text by typing after the colon. (BETA) 🔍\n*${COMMANDS.ABOUT.type}* - Explore GiggleBot essence and features. 🔮\n*${COMMANDS.CONTACT.type}* - Get in touch with the project manager. 📞\n*${COMMANDS.DONATE.type}* - Support GiggleBot's and others projects development. 💙\n\nTo view this menu again, type **${this.type}**. \n\n Enjoy your chat with GiggleBot! 😄`;
+    return `If you want to create a sticker, simply send an image, video, or gif. 📷🎥🎞️\n\nCommand List:\n\n*${COMMANDS.FUNKY.type}* - Create a funky sticker by typing your search or keyword after the colon. 🔍\n*${COMMANDS.CREATE.type}* - Create a funky sticker with just text by typing after the colon. (BETA) 🔍\n*${COMMANDS.WIZARD.type}* - Create stickers with AI by sending a text message, and the AI will generate a fun sticker based on your text! 🤖🎉\n*${COMMANDS.ABOUT.type}* - Explore GiggleBot essence and features. 🔮\n*${COMMANDS.CONTACT.type}* - Get in touch with the project manager. 📞\n*${COMMANDS.DONATE.type}* - Support GiggleBot's and others projects development. 💙\n\nTo view this menu again, type **${this.type}**. \n\nEnjoy your chat with GiggleBot! 😄`;
   }
 }
 
 function generateCommands() {
   const COMMANDS = {
     FUNKY: new FunkyCommand(),
+    WIZARD: new WizardCommand(),
     CREATE: new CreateCommand(),
     ABOUT: new AboutCommand(),
     CONTACT: new ContactCommand(),

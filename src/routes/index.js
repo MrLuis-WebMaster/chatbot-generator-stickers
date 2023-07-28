@@ -1,14 +1,14 @@
 const express = require('express');
 
-const whatsappRouter = require('../whatsapp/whatsapp.controller');
-const webhookRouter = require('../webhook/release.controller');
-const healthyRouter = require('./healthy');
+// const ActionsRouter = require('../controllers/bulkmessages.controller');
+const whatsappRouter = require('../controllers/whatsapp.controller');
+const webhookRouter = require('../controllers/release.controller');
 
 const indexRouter = express.Router();
 
+// indexRouter.use('/', ActionsRouter);
 indexRouter.use('/', whatsappRouter);
 indexRouter.use('/webhook', webhookRouter);
-indexRouter.use('/healthy', healthyRouter);
 
 
 module.exports = indexRouter

@@ -1,20 +1,22 @@
 const express = require("express");
 const router = express.Router();
 
-const whatsappService = require('./whatsapp.service')
+const whatsappService = require('../services/whatsapp.service')
+const UserService = require('../services/user.service')
 
 const services = new whatsappService()
+const userService = new UserService()
 const client = services.client
 
-const statusClient = async () => await client.getState();
 
 client.on("message", async (message) => {
     await services.dispatchServicesForBot(message)
+    await userService.createUser(message)
 });
 
 router.get("/", async function (req, res, next) {
   try {
-    const clientStatus = await statusClient();
+    const clientStatus = await client.getState();
     if (clientStatus) {
       res.render("session_active", { title: "Sticker Generator" });
       return;
@@ -27,7 +29,7 @@ router.get("/", async function (req, res, next) {
 
 router.get("/qr", async function (req, res, next) {
   try {
-    const clientStatus = await statusClient();
+    const clientStatus = await client.getState();
     if (clientStatus) {
       res.redirect("/");
     } else {
