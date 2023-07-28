@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const { client } = require('../whatsapp/whatsapp.controller')
+const { client } = require('./whatsapp.controller')
 
 router.post("/release", async function (req, res, next) {
   try {

@@ -3,10 +3,12 @@ const fs = require("fs");
 const mime = require("mime-types");
 const path = require("path");
 const qrcode = require("qrcode-terminal");
-const { createCanvas, registerFont } = require('canvas');
+const { createCanvas } = require('canvas');
 
-const getStickersbyServiceGif = require("../services/gif");
-const { COMMANDS, INFO_MESSAGES } = require("../utils/messages");
+
+const getStickersbyServiceGif = require("./gif.service");
+const generateImageFromPrompt = require("./image.service");
+const { COMMANDS, INFO_MESSAGES } = require("./messages.service");
 const splitTextIntoLines   = require("../utils/nextLine");
 const { colors }   = require("../utils/colors");
 
@@ -120,6 +122,39 @@ class whatsappService {
     }
   }
 
+  async createStickerByAI(message, q) {
+    try {
+      const response = await generateImageFromPrompt(q);
+
+      if (!response.length) {
+        await this.client.sendMessage(
+          message.from,
+          INFO_MESSAGES.NO_RESULTS_STICKER
+        );
+        return;
+      }
+
+      await this.client.sendMessage(
+        message.from,
+        INFO_MESSAGES.CREATING_STICKER
+      );
+
+      await this.client.sendMessage(
+        message.from,
+        await MessageMedia.fromUrl(response),
+        {
+          sendMediaAsSticker: true,
+          stickerAuthor: "Created by bot and made by Luis Martinez",
+          stickerName: "Stickers",
+        }
+      );
+
+      await this.client.sendMessage(message.from, INFO_MESSAGES.FINISH_STICKER);
+    } catch (err) {
+      await this.client.sendMessage(message.from, INFO_MESSAGES.ERROR_STICKER);
+    }
+  }
+
   async createStickerByText(message, options) {
     try {
 
@@ -210,6 +245,15 @@ class whatsappService {
         this.createStickerByGif(message, messageForFunky);
       } else {
         message.reply(COMMANDS.FUNKY.messages.INVALID_COMMAND);
+      }
+    } else if (messageBody.startsWith(COMMANDS.WIZARD.type)) {
+      let messageForWizard = messageBody
+        .slice(messageBody.indexOf(":") + 1)
+        .trimStart();
+      if (messageForWizard) {
+        this.createStickerByAI(message, messageForWizard);
+      } else {
+        message.reply(COMMANDS.WIZARD.messages.INVALID_COMMAND);
       }
     } else if (messageBody.startsWith(COMMANDS.CREATE.type)) {
       let messageForCreate = messageBody
