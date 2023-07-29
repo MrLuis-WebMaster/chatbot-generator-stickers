@@ -38,6 +38,8 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+require('./src/services/cronjobs.service');
+
 const port = process.env.PORT || 3000
 
 app.listen(port, () => {
