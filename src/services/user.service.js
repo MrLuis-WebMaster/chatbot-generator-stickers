@@ -15,7 +15,10 @@ class UserService {
             }
         })
     }
-
+    async totalUsers () {
+        const userCount = await this.prisma.user.count();
+        return userCount;
+    }
 }
 
 module.exports = UserService;
