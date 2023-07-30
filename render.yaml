@@ -1,0 +1,4 @@
+cronjobs:
+  - name: email-report-cron
+    schedule: "0 9 * * 1"
+    command: "node src/services/cronjobs.service.js"
