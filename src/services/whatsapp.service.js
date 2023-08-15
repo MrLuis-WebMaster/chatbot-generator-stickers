@@ -8,6 +8,7 @@ const { createCanvas } = require('canvas');
 
 const getStickersbyServiceGif = require("./gif.service");
 const generateImageFromPrompt = require("./image.service");
+const transformImage = require("./cloudinary.service")
 const { COMMANDS, INFO_MESSAGES } = require("./messages.service");
 const splitTextIntoLines   = require("../utils/nextLine");
 const { colors }   = require("../utils/colors");
@@ -63,6 +64,69 @@ class whatsappService {
         await this.client.sendMessage(
           message.from,
           new MessageMedia(media.mimetype, media.data, filename),
+          {
+            sendMediaAsSticker: true,
+            stickerAuthor: "Created by bot and made by Luis Martinez",
+            stickerName: "Stickers",
+          }
+        );
+
+        fs.unlinkSync(fullFilename);
+
+        await this.client.sendMessage(
+          message.from,
+          INFO_MESSAGES.FINISH_STICKER
+        );
+      }
+    } catch (err) {
+      console.log("Failed to save the file:", err);
+      console.log(`File deleted successfully!`);
+      await this.client.sendMessage(message.from, INFO_MESSAGES.ERROR_STICKER);
+    }
+  }
+  
+  async createStickerByCloudinary(message, q) {
+    try {
+      const media = await message.downloadMedia();
+      const mediaType = media.mimetype;
+      if (!allowedTypes.includes(mediaType.slice(0, mediaType.indexOf("/")))) {
+        await this.client.sendMessage(message.from, INFO_MESSAGES.ERROR_TYPE_ALLOWED_STICKER);
+        return;
+      }
+      if (media) {
+        const mediaPath = path.join(__dirname, "../../public/uploads");
+
+        await this.client.sendMessage(
+          message.from,
+          INFO_MESSAGES.CREATING_STICKER
+        );
+
+        if (!fs.existsSync(mediaPath)) {
+          fs.mkdirSync(mediaPath, { recursive: true });
+        }
+
+        const extension = mime.extension(media.mimetype);
+        const filename = new Date().getTime();
+        const fullFilename = path.join(mediaPath, filename + "." + extension);
+
+        fs.writeFileSync(fullFilename, media.data, { encoding: "base64" });
+
+        console.log("File downloaded successfully!", fullFilename);
+
+        
+        const url = await transformImage({
+          path: fullFilename,
+          text: {
+            body: q?.text,
+            size: q?.size,
+            color: q?.color,
+            position: q?.position,
+          }
+        })
+
+        await this.client.sendMessage(
+          message.from,
+          await MessageMedia.fromUrl(url),
           {
             sendMediaAsSticker: true,
             stickerAuthor: "Created by bot and made by Luis Martinez",
@@ -233,9 +297,18 @@ class whatsappService {
     let messageBody = message.body;
     await chat.sendSeen();
     await chat.sendStateTyping();
-
     if (message.hasMedia) {
-      this.createSticker(message);
+      if (message._data.caption) {
+        const keyValuePairs = message._data.caption.split(', ');
+        const result = {};
+        keyValuePairs.forEach(pair => {
+          const [key, value] = pair.split(': ');
+          result[key.toLowerCase().trim()] = value.trim();
+        });
+        this.createStickerByCloudinary(message,result)
+      } else {
+        this.createSticker(message);
+      }
       return;
     } else if (messageBody.startsWith(COMMANDS.FUNKY.type)) {
       let messageForFunky = messageBody
