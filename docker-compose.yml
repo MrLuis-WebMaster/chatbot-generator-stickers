@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    env_file: .env
+    volumes:
+      - ./src:/usr/src/app/src
+    ports:
+      - 3000:8080
+  db:
+    image: postgres:14
+    ports:
+      - 5433:5432
+    volumes:
+      - /var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=fl0user
+      - POSTGRES_PASSWORD=password
