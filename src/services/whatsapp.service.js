@@ -10,8 +10,8 @@ const getStickersbyServiceGif = require("./gif.service");
 const generateImageFromPrompt = require("./image.service");
 const transformImage = require("./cloudinary.service")
 const { COMMANDS, INFO_MESSAGES } = require("./messages.service");
-const splitTextIntoLines   = require("../utils/nextLine");
-const { colors }   = require("../utils/colors");
+const splitTextIntoLines = require("../utils/nextLine");
+const { colors } = require("../utils/colors");
 
 const allowedTypes = ["image", "video"];
 
@@ -19,7 +19,8 @@ class whatsappService {
   client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
-      args: ["--no-sandbox"],
+      args: ["--no-sandbox", "-disable-dev-shm-usage"],
+      // executablePath: process.env.CHROME_PATH
     },
     ffmpegPath: process.env.ROUTE_FFMPEG,
   });
@@ -84,7 +85,7 @@ class whatsappService {
       await this.client.sendMessage(message.from, INFO_MESSAGES.ERROR_STICKER);
     }
   }
-  
+
   async createStickerByCloudinary(message, q) {
     try {
       const media = await message.downloadMedia();
@@ -113,7 +114,7 @@ class whatsappService {
 
         console.log("File downloaded successfully!", fullFilename);
 
-        
+
         const url = await transformImage({
           path: fullFilename,
           text: {
@@ -228,21 +229,21 @@ class whatsappService {
       );
 
 
-      function createCenteredTextImage(text, width = 1200, height = 1200, bgcolor = colors.black, textcolor = colors.white ) {
+      function createCenteredTextImage(text, width = 1200, height = 1200, bgcolor = colors.black, textcolor = colors.white) {
         const canvas = createCanvas(width, height);
         const context = canvas.getContext('2d');
 
-        
+
         const fontSize = Math.floor(Math.min(width, height) * 0.1);
         context.font = `${fontSize}px Arial`;
 
 
-        context.fillStyle = bgcolor || colors[bgcolor]; 
+        context.fillStyle = bgcolor || colors[bgcolor];
 
         context.fillRect(0, 0, width, height);
         const lines = splitTextIntoLines(text, width - 25, context);
 
-        context.fillStyle = textcolor || colors[textcolor]; 
+        context.fillStyle = textcolor || colors[textcolor];
 
         const textHeight = lines.length * fontSize * 1.2;
 
@@ -262,7 +263,7 @@ class whatsappService {
       if (typeof options === 'string') {
         buffer = createCenteredTextImage(options, 1200, 1200);
       } else {
-        const {text, bgcolor, textcolor} = options
+        const { text, bgcolor, textcolor } = options
         buffer = createCenteredTextImage(text, 900, 900, bgcolor, textcolor);
       }
 
@@ -305,7 +306,7 @@ class whatsappService {
           const [key, value] = pair.split(': ');
           result[key.toLowerCase().trim()] = value.trim();
         });
-        this.createStickerByCloudinary(message,result)
+        this.createStickerByCloudinary(message, result)
       } else {
         this.createSticker(message);
       }
@@ -332,39 +333,39 @@ class whatsappService {
       let messageForCreate = messageBody
         .slice(messageBody.indexOf(":") + 1)
         .trimStart();
-        if (messageForCreate) {
-            try {
-              const parenthesisStartIndex = messageForCreate.indexOf("(");
-              const parenthesisEndIndex = messageForCreate.indexOf(")");
-            
-              if (parenthesisStartIndex !== -1 && parenthesisEndIndex !== -1 && parenthesisStartIndex < parenthesisEndIndex) {
-                const result = messageForCreate.slice(parenthesisStartIndex + 1, parenthesisEndIndex).trim();
-                const remainingPart = messageForCreate.slice(0, parenthesisStartIndex).trim();
-            
-                const values = result.split(",").map(value => value.split(":"));
-                const options = {
-                  text: remainingPart
-                };
-            
-                values.forEach(([property, val]) => {
-                  const propertyTrimmed = property.trim();
-                  const valueTrimmed = val.trim();
-            
-                  if (propertyTrimmed === "bgcolor" && !options.bgcolor) {
-                    options.bgcolor = valueTrimmed;
-                  } else if (propertyTrimmed === "textcolor" && !options.textcolor) {
-                    options.textcolor = valueTrimmed;
-                  }
-                });
-                this.createStickerByText(message, options);
-              } else {
-                this.createStickerByText(message, messageForCreate);
+      if (messageForCreate) {
+        try {
+          const parenthesisStartIndex = messageForCreate.indexOf("(");
+          const parenthesisEndIndex = messageForCreate.indexOf(")");
+
+          if (parenthesisStartIndex !== -1 && parenthesisEndIndex !== -1 && parenthesisStartIndex < parenthesisEndIndex) {
+            const result = messageForCreate.slice(parenthesisStartIndex + 1, parenthesisEndIndex).trim();
+            const remainingPart = messageForCreate.slice(0, parenthesisStartIndex).trim();
+
+            const values = result.split(",").map(value => value.split(":"));
+            const options = {
+              text: remainingPart
+            };
+
+            values.forEach(([property, val]) => {
+              const propertyTrimmed = property.trim();
+              const valueTrimmed = val.trim();
+
+              if (propertyTrimmed === "bgcolor" && !options.bgcolor) {
+                options.bgcolor = valueTrimmed;
+              } else if (propertyTrimmed === "textcolor" && !options.textcolor) {
+                options.textcolor = valueTrimmed;
               }
-            } catch (error) {
-              await this.client.sendMessage(message.from, INFO_MESSAGES.ERROR_STICKER);
-            }
+            });
+            this.createStickerByText(message, options);
+          } else {
+            this.createStickerByText(message, messageForCreate);
+          }
+        } catch (error) {
+          await this.client.sendMessage(message.from, INFO_MESSAGES.ERROR_STICKER);
         }
-         else {
+      }
+      else {
         message.reply(COMMANDS.CREATE.messages.INVALID_COMMAND);
       }
     } else if (messageBody.trim() === COMMANDS.HELP.type) {
