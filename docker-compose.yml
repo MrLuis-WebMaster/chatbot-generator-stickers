@@ -6,9 +6,10 @@ services:
       context: .
       dockerfile: Dockerfile
       target: development
+    user: node
     env_file: .env
     volumes:
-      - ./src:/usr/src/app/src
+      - ./src:/home/node/app/src
     ports:
       - 3000:8080
   db:
