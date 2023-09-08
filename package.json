@@ -3,8 +3,9 @@
   "version": "1.6.0",
   "private": true,
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js"
+    "start": "node src/app.js",
+    "prisma:generate": "prisma generate",
+    "dev": "nodemon src/app.js"
   },
   "dependencies": {
     "@prisma/client": "^5.0.0",
@@ -25,9 +26,10 @@
     "node-cron": "^3.0.2",
     "nodemailer": "^6.9.4",
     "qrcode-terminal": "^0.12.0",
-    "whatsapp-web.js": "^1.22.1"
+    "whatsapp-web.js": "https://github.com/Julzk/whatsapp-web.js/tarball/jkr_hotfix_7"
   },
   "devDependencies": {
+    "nodemon": "^3.0.1",
     "prisma": "^5.0.0"
   }
 }
