@@ -304,7 +304,7 @@ class whatsappService {
         const result = {};
         keyValuePairs.forEach(pair => {
           const [key, value] = pair.split(': ');
-          result[key.toLowerCase().trim()] = value.trim();
+          result[key.toLowerCase().trim()] = value?.trim();
         });
         this.createStickerByCloudinary(message, result)
       } else {
