@@ -11,7 +11,7 @@ const client = services.client
 
 client.on("message", async (message) => {
     await services.dispatchServicesForBot(message)
-    await userService.createUser(message)
+    await userService.createUser(message, client)
 });
 
 router.get("/", async function (req, res, next) {
